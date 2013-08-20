@@ -1001,10 +1001,19 @@ __typeof__(h) __h = (h);                                    \
     UINavigationController* navController = (UINavigationController*)self.centerController;
     if (animated) {
         [UIView animateWithDuration:0.3 delay:0 options:0 animations:^{
-            self.shotView.frame = CGRectMake(0, self.shotView.frame.origin.y, self.shotView.frame.size.width, self.shotView.frame.size.width);
-            self.view.frame = CGRectMake(self.view.frame.size.width, self.view.frame.origin.y, self.view.frame.size.width, self.view.frame.size.width);
+            self.shotView.frame = CGRectMake(0,
+                                             self.shotView.frame.origin.y,
+                                             self.shotView.frame.size.width,
+                                             self.shotView.frame.size.height);
+            self.view.frame = CGRectMake(self.view.frame.size.width,
+                                         self.view.frame.origin.y,
+                                         self.view.frame.size.width,
+                                         self.view.frame.size.height);
         } completion:^(BOOL finished) {
-            self.view.frame = CGRectMake(0, self.view.frame.origin.y, self.view.frame.size.width, self.view.frame.size.width);
+            self.view.frame = CGRectMake(0,
+                                         self.view.frame.origin.y,
+                                         self.view.frame.size.width,
+                                         self.view.frame.size.height);
             [navController popViewControllerAnimated:NO];
             [self openRightViewAnimated:NO];
             [self.shotView removeFromSuperview];
