@@ -6,7 +6,7 @@ build/*
 xcuserdata
 project.xcworkspace/*
 xcuserdata/*
-
+DerivedData/*
 # osx noise
 .DS_Store
 profile

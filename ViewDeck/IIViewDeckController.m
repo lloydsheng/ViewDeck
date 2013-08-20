@@ -96,7 +96,7 @@ __typeof__(h) __h = (h);                                    \
 
 @interface IIViewDeckController () <UIGestureRecognizerDelegate> 
 
-
+@property (nonatomic, retain) UIView *shotView;
 @property (nonatomic, retain) UIView* referenceView;
 @property (nonatomic, readonly) CGRect referenceBounds;
 @property (nonatomic, readonly) CGRect centerViewBounds;
@@ -969,18 +969,19 @@ __typeof__(h) __h = (h);                                    \
 
 - (void)rightViewPushViewControllerOverCenterController:(UIViewController*)controller {
     NSAssert([self.centerController isKindOfClass:[UINavigationController class]], @"cannot rightViewPushViewControllerOverCenterView when center controller is not a navigation controller");
-
+    
     UIGraphicsBeginImageContextWithOptions(self.view.bounds.size, YES, 0.0);
-
+    
     CGContextRef context = UIGraphicsGetCurrentContext();
     [self.view.layer renderInContext:context];
     UIImage *deckshot = UIGraphicsGetImageFromCurrentImageContext();
     UIGraphicsEndImageContext();
     
-    UIImageView* shotView = [[UIImageView alloc] initWithImage:deckshot];
-    shotView.frame = self.view.frame; 
-    [self.view.superview addSubview:shotView];
-    CGRect targetFrame = self.view.frame; 
+    [self.shotView removeFromSuperview];
+    self.shotView = [[UIImageView alloc] initWithImage:deckshot];
+    self.shotView.frame = self.view.frame;
+    [self.view.superview addSubview:self.shotView];
+    CGRect targetFrame = self.view.frame;
     self.view.frame = CGRectOffset(self.view.frame, self.view.frame.size.width, 0);
     
     [self closeRightViewAnimated:NO];
@@ -988,15 +989,28 @@ __typeof__(h) __h = (h);                                    \
     [navController pushViewController:controller animated:NO];
     
     [UIView animateWithDuration:0.3 delay:0 options:0 animations:^{
-        shotView.frame = CGRectOffset(shotView.frame, -self.view.frame.size.width, 0);
+        self.shotView.frame = CGRectOffset(self.shotView.frame, -self.view.frame.size.width, 0);
         self.view.frame = targetFrame;
     } completion:^(BOOL finished) {
-        [shotView removeFromSuperview];
+        //        [self.shotView removeFromSuperview];
     }];
 }
 
-
-
+- (void)rightViewPopViewControllerOverCenterController:(BOOL)animated {
+    NSAssert([self.centerController isKindOfClass:[UINavigationController class]], @"cannot rightViewPushViewControllerOverCenterView when center controller is not a navigation controller");
+    UINavigationController* navController = (UINavigationController*)self.centerController;
+    if (animated) {
+        [UIView animateWithDuration:0.3 delay:0 options:0 animations:^{
+            self.shotView.frame = CGRectMake(0, self.shotView.frame.origin.y, self.shotView.frame.size.width, self.shotView.frame.size.width);
+            self.view.frame = CGRectMake(self.view.frame.size.width, self.view.frame.origin.y, self.view.frame.size.width, self.view.frame.size.width);
+        } completion:^(BOOL finished) {
+            self.view.frame = CGRectMake(0, self.view.frame.origin.y, self.view.frame.size.width, self.view.frame.size.width);
+            [navController popViewControllerAnimated:NO];
+            [self openRightViewAnimated:NO];
+            [self.shotView removeFromSuperview];
+        }];
+    }
+}
 #pragma mark - Pre iOS5 message relaying
 
 - (void)relayAppearanceMethod:(void(^)(UIViewController* controller))relay forced:(BOOL)forced {
